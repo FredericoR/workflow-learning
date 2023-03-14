@@ -1,67 +1,62 @@
-name: artifact
+// Credits:
+// https://yourbasic.org/golang/http-server-example/
+// https://stackoverflow.com/a/42533360/2308522
+// https://www.digitalocean.com/community/tutorials/how-to-build-go-executables-for-multiple-platforms-on-ubuntu-16-04
+package main
 
-on: [push]
+import (
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+	"sync"
+	"time"
+)
 
-env:
-  FILE_NAME: hello-server
+func startHttpServer(wg *sync.WaitGroup) *http.Server {
+	srv := &http.Server{Addr: ":11000"}
 
-jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, %s!", r.URL.Path[1:])
+	})
 
-    - name: Check out code
-      uses: actions/checkout@v1
+	go func() {
+		defer wg.Done() // let main know we are done cleaning up
 
-    - name: Build ${{ env.FILE_NAME }} for ubuntu-latest
-      run: go build ${{ env.FILE_NAME }}.go
+		// always returns error. ErrServerClosed on graceful close
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			// unexpected error. port in use?
+			log.Fatalf("ListenAndServe(): %v", err)
+		}
+	}()
 
-    - name: Build ${{ env.FILE_NAME }} for windows-latest
-      run: GOOS=windows GOARCH=amd64 go build ${{ env.FILE_NAME }}.go
-      
-    - name: Upload artifact for linux
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: linux
-        path: ./${{ env.FILE_NAME }}
+	// returning reference so caller can call Shutdown()
+	return srv
+}
 
-    - name: Upload artifact for windows
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: windows
-        path: ./${{ env.FILE_NAME }}.exe
+func main() {
+	log.Printf("main: starting HTTP server")
 
-  test-linux:
-    name: Test Linux
-    runs-on: [ubuntu-latest]
-    needs: [build]
-    steps:
+	httpServerExitDone := &sync.WaitGroup{}
 
-    - name: Check out code
-      uses: actions/checkout@v1
+	httpServerExitDone.Add(1)
+	srv := startHttpServer(httpServerExitDone)
 
-    - name: Download artifact
-      uses: actions/download-artifact@v1.0.0
-      with:
-        name: linux
+	log.Printf("main: serving for 10 seconds")
 
-    - name: Test ${{ env.FILE_NAME }}
-      run: source ./test.sh
+	time.Sleep(10 * time.Second)
 
-  test-windows:
-    name: Test Windows
-    runs-on: [windows-latest]
-    needs: [build]
-    steps:
+	log.Printf("main: stopping HTTP server")
 
-    - name: Check out code
-      uses: actions/checkout@v1
+	// now close the server gracefully ("shutdown")
+	// timeout could be given with a proper context
+	// (in real world you shouldn't use TODO()).
+	if err := srv.Shutdown(context.TODO()); err != nil {
+		panic(err) // failure/timeout shutting down the server gracefully
+	}
 
-    - name: Download artifact
-      uses: actions/download-artifact@v1.0.0
-      with:
-        name: windows
-        
-    - name: Test ${{ env.FILE_NAME }}
-      run: windows/${{ env.FILE_NAME }}.exe
+	// wait for goroutine started in startHttpServer() to stop
+	httpServerExitDone.Wait()
+
+	log.Printf("main: done. exiting")
+}
