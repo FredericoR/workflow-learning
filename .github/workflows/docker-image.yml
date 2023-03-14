@@ -12,9 +12,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Read a file from another repository
     - uses: actions/checkout@v3
-    - name: Build the Docker image
-      uses: docker://hello-world:latest
+      with: 
+        repository: FredericoR/workflow-test-repository
+        ref: main
+    - name: cat
+      run: cat README.md
   
   job-2:
     
