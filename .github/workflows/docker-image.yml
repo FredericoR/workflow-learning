@@ -18,7 +18,7 @@ jobs:
         repository: FredericoR/workflow-test-repository
         ref: main
     - name: cat
-      run: cat README.md
+      run: cat ./README.md
   
   job-2:
     
