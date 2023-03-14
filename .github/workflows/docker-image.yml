@@ -13,10 +13,13 @@ jobs:
 
     steps:
     - name: Read a file from another repository
-    - uses: actions/checkout@v3
+      uses: actions/checkout@v3
       with: 
         repository: FredericoR/workflow-test-repository
         ref: main
+        
+    - name: cat
+      run: cat ./README.md
   
   job-2:
     
