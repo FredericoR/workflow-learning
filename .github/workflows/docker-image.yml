@@ -7,19 +7,19 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+#   build:
 
-    runs-on: ubuntu-latest
+#     runs-on: ubuntu-latest
 
-    steps:
-    - name: Read a file from another repository
-      uses: actions/checkout@v3
-      with: 
-        repository: FredericoR/workflow-test-repository
-        ref: main
+#     steps:
+#     - name: Read a file from another repository
+#       uses: actions/checkout@v3
+#       with: 
+#         repository: FredericoR/workflow-test-repository
+#         ref: main
         
-    - name: cat
-      run: cat ./README.md
+#     - name: cat
+#       run: cat ./README.md
   
   job-2:
     
@@ -34,8 +34,9 @@ jobs:
   tell-a-secret:
     
     runs-on: ubuntu-latest
+    
     env:
-      SEGREDO: ${{ secrets.OH_NO }}
+      SEGREDO: cacatinho
       
     steps:
     - name: Contar o segredo
