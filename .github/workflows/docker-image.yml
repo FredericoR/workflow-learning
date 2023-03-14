@@ -30,3 +30,15 @@ jobs:
       run: dir
     - name: Display Date
       run: "Get-Date -DisplayHint Date"
+      
+  tell-a-secret:
+    
+    runs-on: ubuntu-latest
+    env:
+      SEGREDO: ${{ secrets.OH_NO }}
+      
+    steps:
+    - name: Contar o segredo
+      run: |
+        echo Olha só, $SEGREDO! 
+      
