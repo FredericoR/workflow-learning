@@ -34,7 +34,7 @@ jobs:
     
     steps:
     - name: read file
-      run: cat data.txt
+      run: cat ./data.txt
   
   
   
