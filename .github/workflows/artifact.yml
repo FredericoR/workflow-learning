@@ -34,7 +34,7 @@ jobs:
     
     steps:
     - name: read file
-      run: cat tests
+      run: cat data.txt
   
   
   
