@@ -13,7 +13,7 @@ jobs:
     - name: create file
       run: echo "Test" > data.txt
     - name: upload file
-      uses: actions/upload-artifact@3.1.2
+      uses: actions/upload-artifact@3
       with:
         name: tests
         path: ./tests.txt
@@ -24,7 +24,7 @@ jobs:
     
     steps:
     - name: download file
-      uses: actions/download-artifact@v2.1.1
+      uses: actions/download-artifact@v2
       with:
         name: tests
     
