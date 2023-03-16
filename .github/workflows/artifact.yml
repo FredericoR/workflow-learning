@@ -1,1 +1,40 @@
+name: Upload Artifact
 
+on:
+  push: 
+    branches: ["main"]
+
+jobs:
+  
+  upload-artifact:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: create file
+      run: echo "Test" > data.txt
+    - name: upload file
+      uses: actions/upload-artifact@3.1.2
+      with:
+        name: tests
+        path: ./tests.txt
+    
+  download-artifact:
+    needs: upload-artifact
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: download file
+      uses: actions/download-artifact@v2.1.1
+      with:
+        name: tests
+    
+  read-file:
+    needs: download-artifact
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: read file
+      run: cat tests
+  
+  
+  
